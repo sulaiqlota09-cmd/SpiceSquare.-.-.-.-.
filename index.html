@@ -217,6 +217,8 @@ msg+=`Location: https://www.google.com/maps?q=${lat},${lng}%0A`;
 msg+=`Customer: ${name} - ${phone}`;
 window.open(`https://wa.me/${whatsappNumber}?text=${msg}`,"_blank");
 }
+  document.getElementById("mainContent").style.display = "block";
+document.getElementById("launchScreen").style.display = "none";
 
 // ---------------- OPEN/CLOSE STATUS ----------------
 function checkRestaurantStatus(){
@@ -245,4 +247,5 @@ setInterval(checkRestaurantStatus,60000);
 </script>
 </body>
 </html>
+
 
