@@ -224,35 +224,43 @@ msg+=`Location: https://www.google.com/maps?q=${lat},${lng}`;
 window.open(`https://wa.me/${whatsappNumber}?text=${msg}`,"_blank");
 }
 </script>
-  <script>
-function checkRestaurantStatus() {
+<script>
+function checkLaunchStatus() {
+
+  // 2026-02-19
+  const launchDate = new Date("2026-02-19T16:00:00"); // 4 PM launch
+
   const now = new Date();
-  const hours = now.getHours();
-  const minutes = now.getMinutes();
-  const currentTime = hours + minutes / 60;
-
-  const openTime = 16;   // 4 PM
-  const closeTime = 23;  // 11 PM
-
   const placeBtn = document.getElementById("placeBtn");
   const banner = document.getElementById("statusBanner");
 
   if (!placeBtn || !banner) return;
 
-  if (currentTime >= openTime && currentTime < closeTime) {
-    placeBtn.disabled = false;
-    banner.innerText = "We are Open! Orders till 11 PM.";
-    banner.style.background = "green";
-  } else {
+  if (now < launchDate) {
+    // BEFORE LAUNCH
     placeBtn.disabled = true;
-    banner.innerText = "Restaurant Closed. Orders taken 4 PM to 11 PM only.";
+    banner.innerHTML = "🚧 Spice Square is Opening Tomorrow at 4 PM!";
     banner.style.background = "red";
+  } else {
+    // AFTER LAUNCH → normal timing (4 PM - 11 PM daily)
+    const hours = now.getHours();
+
+    if (hours >= 16 && hours < 23) {
+      placeBtn.disabled = false;
+      banner.innerHTML = "🟢 We Are Open! Orders till 11 PM.";
+      banner.style.background = "green";
+    } else {
+      placeBtn.disabled = true;
+      banner.innerHTML = "🔴 Orders available daily from 4 PM to 11 PM.";
+      banner.style.background = "red";
+    }
   }
 }
 
-checkRestaurantStatus();
-  </script>
+checkLaunchStatus();
+</script>
 
 </body>
 
 </html>
+
