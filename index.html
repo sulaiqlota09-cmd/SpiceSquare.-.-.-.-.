@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>SPICESQUARE</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
 <style>
 body{margin:0;font-family:Arial;background:#111;color:#fff}
 header{text-align:center;padding:15px;border-bottom:2px solid orange}
@@ -54,34 +53,30 @@ display:none
 }
 input{width:100%;padding:8px;margin:6px 0}
 .hidden{display:none}
+#statusBanner{text-align:center;padding:10px;background:red;color:white;font-weight:bold}
+#offerBanner{display:none;text-align:center;background:#ffcc00;color:#000;padding:10px;font-weight:bold;font-size:16px}
 </style>
 </head>
 
 <body>
-  <div id="launchScreen" style="
-text-align:center;
-padding-top:100px;
-height:100vh;
-background:black;
-color:white;
-font-family:Arial;">
-  
-  <h1>🍽 Spice Square</h1>
-  <h2>We Are Launching Tomorrow at 4 PM</h2>
-  <h3 id="countdown" style="margin-top:30px;font-size:24px;"></h3>
-
+  <!-- Launch Screen -->
+  <div id="launchScreen" style="text-align:center;padding-top:100px;height:100vh;background:black;color:white;font-family:Arial;">
+    <h1>🍽 Spice Square</h1>
+    <h2>We Are Launching Tomorrow at 4 PM</h2>
+    <h3 id="countdown" style="margin-top:30px;font-size:24px;"></h3>
   </div>
-  
-<div id="statusBanner" 
-style="text-align:center;padding:10px;background:red;color:white;font-weight:bold;">
-</div>
-  
+
+<div id="statusBanner"></div>
+
 <header>
 <h1>SPICESQUARE</h1>
 <p>Taste That Brings You Back</p>
 <p>📍 Aman Nagar Chowkdi, Char Rasta, Bhuj-Kutch</p>
 <p>📞 87803 43199</p>
 </header>
+
+<div id="offerBanner">🎉 Special Offer: 20% OFF on orders upto ₹199! (Combos excluded)</div>
+
 <div id="mainContent">
 <div class="container">
 <div id="menu"></div>
@@ -100,117 +95,103 @@ style="text-align:center;padding:10px;background:red;color:white;font-weight:bol
 
 <div class="toast" id="toast"></div>
 </div>
+</div>
 
 <script>
+// ---------------- CONFIG ----------------
 const whatsappNumber="918780343199";
 const resLat=23.2420,resLng=69.6669;
+const offerDate = new Date("2026-02-19"); // Offer date
+const today = new Date();
+let isOfferActive = today.toDateString() === offerDate.toDateString();
+const offerBanner = document.getElementById("offerBanner");
+if(isOfferActive){ offerBanner.style.display = "block"; }
 
+// ---------------- MENU ----------------
 const menuData={
-
-"NON-VEG PIZZA":{
-"Chicken Pizza":{price:150,img:"https://i.postimg.cc/5NpZSQh2/1771079248797-(1).jpg"},
-"Chicken Garlic Pizza":{price:200,img:"https://i.postimg.cc/q7tqTTsN/1771099301849-(1).jpg"},
-"Chicken Tandoori Pizza":{price:220,img:"https://i.postimg.cc/Gtd5kbzY/1771080336683-(1).jpg"},
-"Chicken Makhani Pizza":{price:250,img:"https://i.postimg.cc/ZKfMdtNp/1771080265418-(1).jpg"},
-"Chicken Cheese Blast Pizza":{price:260,img:"https://i.postimg.cc/Prq6h378/1771080545377-(1).png"},
-"Chicken Burger Pizza":{price:270,img:"https://i.postimg.cc/t4Bnbk8f/1771080974147-(2).png"}
-},
-
-"VEG PIZZA":{
-"Margherita Pizza":{price:90,img:"https://i.postimg.cc/Y03ZSwXC/1771079076420-(1).jpg"},
-"Italian Pizza":{price:120,img:"https://i.postimg.cc/C1NNpkHK/1771081066682-(1).jpg"},
-"Garlic Pizza":{price:130,img:"https://i.postimg.cc/PJnPyR88/1771099205077-(1).jpg"},
-"Paneer Tikka Pizza":{price:160,img:"https://i.postimg.cc/jdLyjG40/1771222475772-(1).jpg"},
-"Paneer Punjabi Pizza":{price:180,img:"https://i.postimg.cc/mDmFLwc8/1771222533160-(1).jpg"}
-},
-
-"BURGER":{
-"Chicken Burger":{price:120,img:"https://i.postimg.cc/3xxVWrb2/1771098995913-(1).jpg"},
-"Chicken Tandoori Burger":{price:140,img:"https://i.postimg.cc/QdJkTcv3/1771099064171-(1).jpg"},
-"Chicken Makhani Burger":{price:150,img:"https://i.postimg.cc/NGbcpnTw/1771220849550-(1).jpg"},
-"Tandoori Burger":{price:90,img:"https://i.postimg.cc/yx23M85N/1771098869176-(1).jpg"},
-"Veg Burger":{price:80,img:"https://i.postimg.cc/7LN75DCR/1771085827279-(1).jpg"}
-},
-
-"HOTDOG":{
-"Veg Hotdog":{price:100,img:"https://i.postimg.cc/G2rWjPmp/1771099421189-(1).jpg"},
-"Non-Veg Hotdog":{price:150,img:"https://i.postimg.cc/nrSNZ6Yd/1771099544658-(1).jpg"}
-},
-
-"SANDWICH":{
-"Masala Cheese Sandwich":{price:80,img:"https://i.postimg.cc/jjYms6NZ/1771099603598-(1).jpg"},
-"Veg-Cheese Sandwich":{price:100,img:"https://i.postimg.cc/RVngN6M4/1771100328294-(1).jpg"},
-"Chicken Tandoori Sandwich":{price:160,img:"https://i.postimg.cc/Vv0WrpP6/1771099764670-(1).jpg"},
-"Chicken Masala Sandwich":{price:170,img:"https://i.postimg.cc/GhY66STm/1771099812660-(1).jpg"}
-},
-
-"OTHERS":{
-"French Fries":{price:60,img:"https://i.postimg.cc/7hzQ8f6F/1771099857151-(1).jpg"}
-},
-
-"COMBOS":{
-"Family Combo":{price:350,img:"https://i.postimg.cc/fbw4cjLm/1771221504139-(1).jpg"},
-"Couple Combo":{price:250,img:"https://i.postimg.cc/VsSN01p2/1771221776694-(1).jpg"}
-}
-
+"NON-VEG PIZZA":{"Chicken Pizza":{price:150,img:"https://i.postimg.cc/5NpZSQh2/1771079248797-(1).jpg"},"Chicken Garlic Pizza":{price:200,img:"https://i.postimg.cc/q7tqTTsN/1771099301849-(1).jpg"},"Chicken Tandoori Pizza":{price:220,img:"https://i.postimg.cc/Gtd5kbzY/1771080336683-(1).jpg"},"Chicken Makhani Pizza":{price:250,img:"https://i.postimg.cc/ZKfMdtNp/1771080265418-(1).jpg"},"Chicken Cheese Blast Pizza":{price:260,img:"https://i.postimg.cc/Prq6h378/1771080545377-(1).png"},"Chicken Burger Pizza":{price:270,img:"https://i.postimg.cc/t4Bnbk8f/1771080974147-(2).png"}},
+"VEG PIZZA":{"Margherita Pizza":{price:90,img:"https://i.postimg.cc/Y03ZSwXC/1771079076420-(1).jpg"},"Italian Pizza":{price:120,img:"https://i.postimg.cc/C1NNpkHK/1771081066682-(1).jpg"},"Garlic Pizza":{price:130,img:"https://i.postimg.cc/PJnPyR88/1771099205077-(1).jpg"},"Paneer Tikka Pizza":{price:160,img:"https://i.postimg.cc/jdLyjG40/1771222475772-(1).jpg"},"Paneer Punjabi Pizza":{price:180,img:"https://i.postimg.cc/mDmFLwc8/1771222533160-(1).jpg"}},
+"BURGER":{"Chicken Burger":{price:120,img:"https://i.postimg.cc/3xxVWrb2/1771098995913-(1).jpg"},"Chicken Tandoori Burger":{price:140,img:"https://i.postimg.cc/QdJkTcv3/1771099064171-(1).jpg"},"Chicken Makhani Burger":{price:150,img:"https://i.postimg.cc/NGbcpnTw/1771220849550-(1).jpg"},"Tandoori Burger":{price:90,img:"https://i.postimg.cc/yx23M85N/1771098869176-(1).jpg"},"Veg Burger":{price:80,img:"https://i.postimg.cc/7LN75DCR/1771085827279-(1).jpg"}},
+"HOTDOG":{"Veg Hotdog":{price:100,img:"https://i.postimg.cc/G2rWjPmp/1771099421189-(1).jpg"},"Non-Veg Hotdog":{price:150,img:"https://i.postimg.cc/nrSNZ6Yd/1771099544658-(1).jpg"}},
+"SANDWICH":{"Masala Cheese Sandwich":{price:80,img:"https://i.postimg.cc/jjYms6NZ/1771099603598-(1).jpg"},"Veg-Cheese Sandwich":{price:100,img:"https://i.postimg.cc/RVngN6M4/1771100328294-(1).jpg"},"Chicken Tandoori Sandwich":{price:160,img:"https://i.postimg.cc/Vv0WrpP6/1771099764670-(1).jpg"},"Chicken Masala Sandwich":{price:170,img:"https://i.postimg.cc/GhY66STm/1771099812660-(1).jpg"}},
+"OTHERS":{"French Fries":{price:60,img:"https://i.postimg.cc/7hzQ8f6F/1771099857151-(1).jpg"}},
+"COMBOS":{"Family Combo":{price:350,img:"https://i.postimg.cc/fbw4cjLm/1771221504139-(1).jpg"},"Couple Combo":{price:250,img:"https://i.postimg.cc/VsSN01p2/1771221776694-(1).jpg"}}
 };
 
 let cart=[],total=0,eta=0,lat=0,lng=0;
 
+// ---------------- BUILD MENU ----------------
 function buildMenu(){
-let h="";
-for(let cat in menuData){
-h+=`<div class="section"><h3>${cat}</h3>`;
-for(let item in menuData[cat]){
-let it=menuData[cat][item];
-h+=`<div class="item">
-<img src="${it.img}" alt="${item}">
-<span>${item}</span>
-<span>₹${it.price}</span>
-<button onclick="addItem('${item}',${it.price})">Add</button>
-</div>`;
-}
-h+="</div>";
-}
-menu.innerHTML=h;
+  let h="";
+  for(let cat in menuData){
+    h+=`<div class="section"><h3>${cat}</h3>`;
+    for(let item in menuData[cat]){
+      let it=menuData[cat][item];
+      h+=`<div class="item">
+        <img src="${it.img}" alt="${item}">
+        <span>${item}</span>
+        <span>₹${it.price}</span>
+        <button onclick="addItem('${item}',${it.price})">Add</button>
+      </div>`;
+    }
+    h+="</div>";
+  }
+  menu.innerHTML=h;
 }
 buildMenu();
 
+// ---------------- TOAST ----------------
 function toast(msg){
-let t=document.getElementById("toast");
-t.innerText=msg;
-t.style.display="block";
-setTimeout(()=>t.style.display="none",2000);
+  let t=document.getElementById("toast");
+  t.innerText=msg;
+  t.style.display="block";
+  setTimeout(()=>t.style.display="none",2000);
 }
 
+// ---------------- ADD ITEM ----------------
 function addItem(n,p){
-let f=cart.find(i=>i.name===n);
-f?f.qty++:cart.push({name:n,price:p,qty:1});
-toast(n+" added to cart");
-renderCart();
+  let f=cart.find(i=>i.name===n);
+  f?f.qty++:cart.push({name:n,price:p,qty:1});
+  toast(n+" added to cart");
+  renderCart();
 }
 
+// ---------------- CART CALCULATION ----------------
+function calculateCartTotal(cart){
+  let total = 0;
+  let discount = 0;
+  cart.forEach(item => { total += item.price * item.qty; });
+  const hasCombo = cart.some(i => i.name.toLowerCase().includes("combo"));
+  if(isOfferActive && total <= 199 && !hasCombo){
+    discount = total * 0.20;
+  }
+  let finalPrice = total - discount;
+  summary.innerHTML = `Items Total ₹${total.toFixed(2)}`;
+  if(discount>0){summary.innerHTML += `<br>20% OFF Applied: -₹${discount.toFixed(2)}<br><b>Final Price ₹${finalPrice.toFixed(2)}</b>`;}
+  else{summary.innerHTML += `<br><b>Total ₹${finalPrice.toFixed(2)}</b>`;}
+  return finalPrice;
+}
+
+// ---------------- RENDER CART ----------------
 function renderCart(){
-let h="",s=0;
-cart.forEach(i=>{s+=i.price*i.qty;h+=`${i.name} x${i.qty}<br>`});
-items.innerHTML=h;
-summary.innerHTML="Items Total ₹"+s;
+  let h="";
+  cart.forEach(i=>{h+=`${i.name} x${i.qty}<br>`;});
+  items.innerHTML=h;
+  calculateCartTotal(cart);
 }
 
+// ---------------- LOCATION & DELIVERY ----------------
 function getLocation(){
 navigator.geolocation.getCurrentPosition(pos=>{
 lat=pos.coords.latitude;
 lng=pos.coords.longitude;
-
 let d=Math.max(1,Math.ceil(calc(lat,lng,resLat,resLng)));
 let delivery=d*10;
 let itemsTotal=cart.reduce((a,b)=>a+b.price*b.qty,0);
 total=itemsTotal+delivery;
 eta=15+(d*5);
-
 summary.innerHTML+=`<br>Delivery ₹${delivery}<br>ETA ${eta} min<br><b>Total ₹${total}</b>`;
 document.getElementById("placeBtn").classList.remove("hidden");
-
 },()=>alert("Please allow location"));
 }
 
@@ -222,63 +203,65 @@ Math.sin((d-b)*Math.PI/360)**2;
 return R*(2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x)));
 }
 
+// ---------------- PLACE ORDER ----------------
 function placeOrder(){
 let name=document.getElementById("custName").value;
 let phone=document.getElementById("custPhone").value;
-
+let finalPrice = calculateCartTotal(cart);
 let msg=`*SPICESQUARE Order*%0A%0A`;
-cart.forEach(i=>{msg+=`${i.name} x${i.qty} - ₹${i.price*i.qty}%0A`});
-msg+=`%0ATotal: ₹${total}%0A`;
-msg+=`ETA: ${eta} min%0A`;
-msg+=`Customer: ${name} - ${phone}%0A`;
-msg+=`Payment: Cash on Delivery%0A`;
-msg+=`Location: https://www.google.com/maps?q=${lat},${lng}`;
-
+cart.forEach(i=>{msg+=`${i.name} x${i.qty} - ₹${i.price*i.qty}%0A`;});
+if(isOfferActive && finalPrice<cart.reduce((a,b)=>a+b.price*b.qty,0)){msg+=`%0A20% OFF Applied%0A`;}
+msg+=`%0AFinal Price: ₹${finalPrice.toFixed(2)}%0A`;
+msg+=`Payment Method: Cash on Delivery%0A`;
+msg+=`Location: https://www.google.com/maps?q=${lat},${lng}%0A`;
+msg+=`Customer: ${name} - ${phone}`;
 window.open(`https://wa.me/${whatsappNumber}?text=${msg}`,"_blank");
 }
-</div>  <!-- mainContent close -->
 
-</script>
-<script>
-
+// ---------------- LAUNCH COUNTDOWN ----------------
 const launchDate = new Date("2026-02-19T16:00:00");
-
 const launchScreen = document.getElementById("launchScreen");
 const mainContent = document.getElementById("mainContent");
 const countdownEl = document.getElementById("countdown");
 
 function updateCountdown() {
-  const now = new Date();
-  const diff = launchDate - now;
-
-  if (diff <= 0) {
-    launchScreen.style.display = "none";
-    mainContent.style.display = "block";
-    return;
-  }
-
-  mainContent.style.display = "none";
-
-  const totalHours = Math.floor(diff / (1000 * 60 * 60));
-const minutes = Math.floor((diff / (1000 * 60)) % 60);
-const seconds = Math.floor((diff / 1000) % 60);
-
-countdownEl.innerHTML =
-  totalHours + "h " +
-  minutes + "m " +
-  seconds + "s ";
+const now = new Date();
+const diff = launchDate - now;
+if(diff<=0){ launchScreen.style.display="none"; mainContent.style.display="block"; return;}
+mainContent.style.display="none";
+const totalHours=Math.floor(diff/(1000*60*60));
+const minutes=Math.floor((diff/1000/60)%60);
+const seconds=Math.floor((diff/1000)%60);
+countdownEl.innerHTML = totalHours + "h " + minutes + "m " + seconds + "s";
 }
 
-setInterval(updateCountdown, 1000);
+setInterval(updateCountdown,1000);
 updateCountdown();
 
+// ---------------- OPEN/CLOSE STATUS ----------------
+function checkRestaurantStatus(){
+const now = new Date();
+const hours = now.getHours();
+const minutes = now.getMinutes();
+const currentTime = hours + minutes/60;
+const openTime = 16; // 4 PM
+const closeTime = 23; // 11 PM
+const placeBtn = document.getElementById("placeBtn");
+const banner = document.getElementById("statusBanner");
+if(!placeBtn || !banner) return;
+if(currentTime>=openTime && currentTime<closeTime){
+placeBtn.disabled=false;
+banner.innerText="We are Open! Orders till 11 PM.";
+banner.style.background="green";
+}else{
+placeBtn.disabled=true;
+banner.innerText="Restaurant Closed. Orders taken 4 PM to 11 PM only.";
+banner.style.background="red";
+}
+}
+checkRestaurantStatus();
+setInterval(checkRestaurantStatus,60000);
+
 </script>
-
 </body>
-
 </html>
-
-
-
-
-
