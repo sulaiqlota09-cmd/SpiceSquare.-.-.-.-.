@@ -58,7 +58,11 @@ input{width:100%;padding:8px;margin:6px 0}
 </head>
 
 <body>
-
+  
+<div id="statusBanner" 
+style="text-align:center;padding:10px;background:red;color:white;font-weight:bold;">
+</div>
+  
 <header>
 <h1>SPICESQUARE</h1>
 <p>Taste That Brings You Back</p>
@@ -220,6 +224,35 @@ msg+=`Location: https://www.google.com/maps?q=${lat},${lng}`;
 window.open(`https://wa.me/${whatsappNumber}?text=${msg}`,"_blank");
 }
 </script>
+  <script>
+function checkRestaurantStatus() {
+  const now = new Date();
+  const hours = now.getHours();
+  const minutes = now.getMinutes();
+  const currentTime = hours + minutes / 60;
+
+  const openTime = 16;   // 4 PM
+  const closeTime = 23;  // 11 PM
+
+  const placeBtn = document.getElementById("placeBtn");
+  const banner = document.getElementById("statusBanner");
+
+  if (!placeBtn || !banner) return;
+
+  if (currentTime >= openTime && currentTime < closeTime) {
+    placeBtn.disabled = false;
+    banner.innerText = "We are Open! Orders till 11 PM.";
+    banner.style.background = "green";
+  } else {
+    placeBtn.disabled = true;
+    banner.innerText = "Restaurant Closed. Orders taken 4 PM to 11 PM only.";
+    banner.style.background = "red";
+  }
+}
+
+checkRestaurantStatus();
+  </script>
 
 </body>
+
 </html>
