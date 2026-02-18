@@ -58,6 +58,19 @@ input{width:100%;padding:8px;margin:6px 0}
 </head>
 
 <body>
+  <div id="launchScreen" style="
+text-align:center;
+padding-top:100px;
+height:100vh;
+background:black;
+color:white;
+font-family:Arial;">
+  
+  <h1>🍽 Spice Square</h1>
+  <h2>We Are Launching Tomorrow at 4 PM</h2>
+  <h3 id="countdown" style="margin-top:30px;font-size:24px;"></h3>
+
+  </div>
   
 <div id="statusBanner" 
 style="text-align:center;padding:10px;background:red;color:white;font-weight:bold;">
@@ -69,7 +82,7 @@ style="text-align:center;padding:10px;background:red;color:white;font-weight:bol
 <p>📍 Aman Nagar Chowkdi, Char Rasta, Bhuj-Kutch</p>
 <p>📞 87803 43199</p>
 </header>
-
+<div id="mainContent">
 <div class="container">
 <div id="menu"></div>
 
@@ -223,106 +236,47 @@ msg+=`Location: https://www.google.com/maps?q=${lat},${lng}`;
 
 window.open(`https://wa.me/${whatsappNumber}?text=${msg}`,"_blank");
 }
+</div>  <!-- mainContent close -->
+
 </script>
 <script>
 
-// ===== RESTAURANT SETTINGS =====
-const restaurantLat = 23.257601;
-const restaurantLng = 69.686339;
-const deliveryRadius = 15; // 15 KM
-const launchDate = new Date("2026-02-19T16:00:00"); // 🔥 Launch date yahan change karo
+const launchDate = new Date("2026-02-19T16:00:00");
 
-// ===== DISTANCE CALCULATION =====
-function toRadians(degrees) {
-  return degrees * (Math.PI / 180);
-}
+const launchScreen = document.getElementById("launchScreen");
+const mainContent = document.getElementById("mainContent");
+const countdownEl = document.getElementById("countdown");
 
-function calculateDistance(lat1, lng1, lat2, lng2) {
-  const R = 6371;
-  const dLat = toRadians(lat2 - lat1);
-  const dLng = toRadians(lng2 - lng1);
-
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(toRadians(lat1)) *
-    Math.cos(toRadians(lat2)) *
-    Math.sin(dLng / 2) *
-    Math.sin(dLng / 2);
-
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
-}
-
-// ===== MAIN CHECK SYSTEM =====
-function checkSystem(userLat = null, userLng = null) {
-
+function updateCountdown() {
   const now = new Date();
-  const placeBtn = document.getElementById("placeBtn");
-  const banner = document.getElementById("statusBanner");
+  const diff = launchDate - now;
 
-  if (!placeBtn || !banner) return;
-
-  // BEFORE LAUNCH
-  if (now < launchDate) {
-    placeBtn.disabled = true;
-    banner.innerHTML = "🚧 Spice Square Opening Soon!";
-    banner.style.background = "red";
+  if (diff <= 0) {
+    launchScreen.style.display = "none";
+    mainContent.style.display = "block";
     return;
   }
 
-  // DAILY TIME CHECK
-  const hours = now.getHours();
-  if (hours < 16 || hours >= 23) {
-    placeBtn.disabled = true;
-    banner.innerHTML = "🔴 Orders available daily from 4 PM to 11 PM.";
-    banner.style.background = "red";
-    return;
-  }
+  mainContent.style.display = "none";
 
-  // DELIVERY RADIUS CHECK
-  if (userLat && userLng) {
-    const distance = calculateDistance(
-      restaurantLat,
-      restaurantLng,
-      userLat,
-      userLng
-    );
+  const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+  const minutes = Math.floor((diff / (1000 * 60)) % 60);
+  const seconds = Math.floor((diff / 1000) % 60);
 
-    if (distance > deliveryRadius) {
-      placeBtn.disabled = true;
-      banner.innerHTML = "❌ Sorry! We deliver only within 15 KM radius.";
-      banner.style.background = "red";
-      return;
-    }
-  }
-
-  // IF EVERYTHING OK
-  placeBtn.disabled = false;
-  banner.innerHTML = "🟢 We Are Open! Orders till 11 PM.";
-  banner.style.background = "green";
+  countdownEl.innerHTML =
+    hours + "h " +
+    minutes + "m " +
+    seconds + "s ";
 }
 
-// ===== GET LOCATION =====
-function getLocation() {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(function(position) {
-      checkSystem(
-        position.coords.latitude,
-        position.coords.longitude
-      );
-    });
-  } else {
-    alert("Geolocation not supported");
-  }
-}
-
-// RUN ON LOAD
-checkSystem();
+setInterval(updateCountdown, 1000);
+updateCountdown();
 
 </script>
 
 </body>
 
 </html>
+
 
 
