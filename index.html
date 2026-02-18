@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>SPICESQUARE</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
 <style>
 body{margin:0;font-family:Arial;background:#111;color:#fff}
 header{text-align:center;padding:15px;border-bottom:2px solid orange}
@@ -61,7 +62,7 @@ color:#000;
 padding:10px;
 font-weight:bold;
 font-size:16px;
-margin:10px 0;
+margin-bottom:10px;
 }
 #statusBanner{
 text-align:center;
@@ -69,6 +70,7 @@ padding:10px;
 background:red;
 color:white;
 font-weight:bold;
+margin-bottom:10px;
 }
 </style>
 </head>
@@ -85,8 +87,9 @@ font-weight:bold;
 🎉 Special Offer: 20% OFF on orders upto ₹199! (Combos excluded)
 </div>
 
-<div class="container">
-<div id="menu"></div>
+<div id="statusBanner"></div>
+
+<div class="container" id="menu"></div>
 
 <div id="cart">
 <h3>Your Order</h3>
@@ -99,26 +102,22 @@ font-weight:bold;
 <button onclick="getLocation()">Allow Location</button>
 <button id="placeBtn" class="hidden" onclick="placeOrder()">Place Order</button>
 </div>
+
 <div class="toast" id="toast"></div>
-</div>
 
 <script>
-// ================= SETTINGS =================
 const whatsappNumber="918780343199";
-const resLat=23.2420,resLng=69.6669;
+const resLat=23.2420, resLng=69.6669;
 
-// Offer Settings
-const offerDate = new Date("2026-02-18"); // Offer Date
+// Offer date
+const offerDate = new Date("2026-02-18");
 const today = new Date();
-let isOfferActive = today.toDateString() === offerDate.toDateString();
+const isOfferActive = today.toDateString() === offerDate.toDateString();
 
-// Show offer banner if offer active
 const offerBanner = document.getElementById("offerBanner");
-if(isOfferActive){
-  offerBanner.style.display = "block";
-}
+if(isOfferActive) offerBanner.style.display="block";
 
-// ================= MENU DATA =================
+// Menu Data
 const menuData={
 "NON-VEG PIZZA":{
 "Chicken Pizza":{price:150,img:"https://i.postimg.cc/5NpZSQh2/1771079248797-(1).jpg"},
@@ -161,129 +160,125 @@ const menuData={
 }
 };
 
-// ================= CART =================
-let cart=[],total=0,eta=0,lat=0,lng=0;
+let cart=[], total=0, eta=0, lat=0, lng=0;
 
-// Build Menu
 function buildMenu(){
-let h="";
-for(let cat in menuData){
-h+=`<div class="section"><h3>${cat}</h3>`;
-for(let item in menuData[cat]){
-let it=menuData[cat][item];
-h+=`<div class="item">
-<img src="${it.img}" alt="${item}">
-<span>${item}</span>
-<span>₹${it.price}</span>
-<button onclick="addItem('${item}',${it.price})">Add</button>
-</div>`;
-}
-h+="</div>";
-}
-menu.innerHTML=h;
+  let h="";
+  for(let cat in menuData){
+    h+=`<div class="section"><h3>${cat}</h3>`;
+    for(let item in menuData[cat]){
+      let it=menuData[cat][item];
+      h+=`<div class="item">
+      <img src="${it.img}" alt="${item}">
+      <span>${item}</span>
+      <span>₹${it.price}</span>
+      <button onclick="addItem('${item}',${it.price})">Add</button>
+      </div>`;
+    }
+    h+="</div>";
+  }
+  document.getElementById("menu").innerHTML=h;
 }
 buildMenu();
 
 function toast(msg){
-let t=document.getElementById("toast");
-t.innerText=msg;
-t.style.display="block";
-setTimeout(()=>t.style.display="none",2000);
+  let t=document.getElementById("toast");
+  t.innerText=msg;
+  t.style.display="block";
+  setTimeout(()=>t.style.display="none",2000);
 }
 
 function addItem(n,p){
-let f=cart.find(i=>i.name===n);
-f?f.qty++:cart.push({name:n,price:p,qty:1});
-toast(n+" added to cart");
-renderCart();
+  let f=cart.find(i=>i.name===n);
+  f?f.qty++:cart.push({name:n,price:p,qty:1});
+  toast(n+" added to cart");
+  renderCart();
 }
 
-// ================= CART CALCULATION =================
-function calculateCartTotal(cart, delivery=0){
-  let itemsTotal = 0;
-  cart.forEach(i => itemsTotal += i.price * i.qty);
+// ----------- CART CALCULATION ------------
+function calculateCartTotal(cart, deliveryCharge){
+  let total = 0;
+  cart.forEach(i=>{ total += i.price*i.qty });
 
-  const hasCombo = cart.some(i => i.name.toLowerCase().includes("combo"));
+  // Discount logic: active, total <=199, no combo
+  const hasCombo = cart.some(i=>i.name.toLowerCase().includes("combo"));
   let discount = 0;
-  if(isOfferActive && itemsTotal <= 199 && !hasCombo){
-    discount = itemsTotal * 0.20;
+  if(isOfferActive && total <=199 && !hasCombo){
+    discount = total*0.20;
   }
 
-  let finalPrice = itemsTotal - discount + delivery;
+  let finalPrice = total + deliveryCharge - discount;
 
-  summary.innerHTML = `Items Total ₹${itemsTotal.toFixed(2)}`;
-  if(discount>0){
-    summary.innerHTML += `<br>20% OFF Applied: -₹${discount.toFixed(2)}`;
-  }
-  summary.innerHTML += `<br>Delivery ₹${delivery}<br><b>Final Price ₹${finalPrice.toFixed(2)}</b>`;
+  // Update summary
+  document.getElementById("summary").innerHTML = 
+    `Items Total ₹${total.toFixed(2)}<br>`+
+    `Delivery ₹${deliveryCharge}<br>`+
+    (discount>0?`20% OFF Applied: -₹${discount.toFixed(2)}<br>`:"")+
+    `<b>Final Price ₹${finalPrice.toFixed(2)}</b>`;
 
   return finalPrice;
 }
 
-// Render Cart
 function renderCart(){
-  let h="",s=0;
-  cart.forEach(i=>{s+=i.price*i.qty;h+=`${i.name} x${i.qty}<br>`});
-  items.innerHTML=h;
-  // Don't calculate final total until location
+  // Wait for location for delivery charge
+  document.getElementById("items").innerHTML = cart.map(i=>`${i.name} x${i.qty}`).join("<br>");
 }
 
-// ================= LOCATION & DELIVERY =================
+// ----------- LOCATION & DELIVERY ------------
 function getLocation(){
-navigator.geolocation.getCurrentPosition(pos=>{
-lat = pos.coords.latitude;
-lng = pos.coords.longitude;
+  navigator.geolocation.getCurrentPosition(pos=>{
+    lat=pos.coords.latitude;
+    lng=pos.coords.longitude;
 
-let distance = Math.max(1, Math.ceil(calc(lat,lng,resLat,resLng)));
-let deliveryCharge = distance * 10;
-eta = 15 + distance*5;
+    let distanceKm = Math.max(1, Math.ceil(calc(lat,lng,resLat,resLng)));
+    let deliveryCharge = distanceKm*10;
+    total = calculateCartTotal(cart, deliveryCharge);
+    eta = 15 + (distanceKm*5);
 
-total = calculateCartTotal(cart, deliveryCharge); // ✅ Delivery + discount
-document.getElementById("placeBtn").classList.remove("hidden");
+    document.getElementById("placeBtn").classList.remove("hidden");
 
-}, ()=>alert("Please allow location"));
+  }, ()=>alert("Please allow location"));
 }
 
 function calc(a,b,c,d){
-const R=6371;
-let x=Math.sin((c-a)*Math.PI/360)**2+
-Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*
-Math.sin((d-b)*Math.PI/360)**2;
-return R*(2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x)));
+  const R=6371;
+  let x=Math.sin((c-a)*Math.PI/360)**2+
+        Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*
+        Math.sin((d-b)*Math.PI/360)**2;
+  return R*(2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x)));
 }
 
-// ================= PLACE ORDER =================
+// ----------- PLACE ORDER ------------
 function placeOrder(){
-const now = new Date();
-const hour = now.getHours();
-if(hour < 16 || hour >= 23){
-  alert("Orders accepted only 4 PM - 11 PM");
-  return;
-}
+  const now = new Date();
+  const hours = now.getHours();
+  if(hours<16 || hours>=23){
+    alert("Orders accepted only from 4 PM to 11 PM");
+    return;
+  }
 
-let name = document.getElementById("custName").value;
-let phone = document.getElementById("custPhone").value;
+  let name = document.getElementById("custName").value;
+  let phone = document.getElementById("custPhone").value;
 
-let finalPrice = total;
+  let distanceKm = Math.max(1, Math.ceil(calc(lat,lng,resLat,resLng)));
+  let deliveryCharge = distanceKm*10;
+  let finalPrice = calculateCartTotal(cart, deliveryCharge);
 
-let msg = `*SPICESQUARE Order*%0A%0A`;
-cart.forEach(i => msg += `${i.name} x${i.qty} - ₹${i.price*i.qty}%0A`);
+  let msg=`*SPICESQUARE Order*%0A%0A`;
+  cart.forEach(i=>{ msg+=`${i.name} x${i.qty} - ₹${i.price*i.qty}%0A` });
 
-const itemsTotal = cart.reduce((a,b)=>a+b.price*b.qty,0);
-const hasCombo = cart.some(i=>i.name.toLowerCase().includes("combo"));
-if(isOfferActive && itemsTotal <= 199 && !hasCombo){
-  msg += `%0A20% OFF Applied%0A`;
-}
+  if(isOfferActive && finalPrice < cart.reduce((a,b)=>a+b.price*b.qty,0)){
+    msg += `%0A20% OFF Applied%0A`;
+  }
 
-msg += `%0ADelivery ₹${total - (itemsTotal - (isOfferActive && !hasCombo && itemsTotal<=199 ? itemsTotal*0.2 : 0))}%0A`;
-msg += `%0AFinal Price ₹${finalPrice.toFixed(2)}%0A`;
-msg += `Payment Method: Cash on Delivery%0A`;
-msg += `Location: https://www.google.com/maps?q=${lat},${lng}%0A`;
-msg += `Customer: ${name} - ${phone}`;
+  msg+=`%0AFinal Price: ₹${finalPrice.toFixed(2)}%0A`;
+  msg+=`ETA: ${15 + distanceKm*5} min%0A`;
+  msg+=`Payment: Cash on Delivery%0A`;
+  msg+=`Location: https://www.google.com/maps?q=${lat},${lng}%0A`;
+  msg+=`Customer: ${name} - ${phone}`;
 
-window.open(`https://wa.me/${whatsappNumber}?text=${msg}`, "_blank");
+  window.open(`https://wa.me/${whatsappNumber}?text=${msg}`,"_blank");
 }
 </script>
 </body>
 </html>
-
