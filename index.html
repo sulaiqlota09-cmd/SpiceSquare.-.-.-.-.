@@ -259,14 +259,16 @@ function updateCountdown() {
 
   mainContent.style.display = "none";
 
-  const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-  const minutes = Math.floor((diff / (1000 * 60)) % 60);
-  const seconds = Math.floor((diff / 1000) % 60);
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+const minutes = Math.floor((diff / (1000 * 60)) % 60);
+const seconds = Math.floor((diff / 1000) % 60);
 
-  countdownEl.innerHTML =
-    hours + "h " +
-    minutes + "m " +
-    seconds + "s ";
+countdownEl.innerHTML =
+  days + "d " +
+  hours + "h " +
+  minutes + "m " +
+  seconds + "s ";
 }
 
 setInterval(updateCountdown, 1000);
@@ -277,6 +279,7 @@ updateCountdown();
 </body>
 
 </html>
+
 
 
 
