@@ -200,8 +200,9 @@ let isOfferActive = today.toDateString()===offerDate.toDateString();
 const hasCombo = cart.some(i=>i.name.toLowerCase().includes("combo"));
 
 let discount=0;
-if(isOfferActive && total <=199 && !hasCombo){ discount = total*0.20; }
-
+if(isOfferActive && total >= 199 && !hasCombo){
+    discount = total * 0.20;
+}
 let finalPrice = total - discount;
 
 // Update summary
@@ -308,3 +309,4 @@ if(isOfferActive){ offerBanner.style.display="block"; }
 
 </body>
 </html>
+
